@@ -8,7 +8,7 @@ router.use(authController.protect);
 
 router
   .route("/")
-  .get(authController.restrictTo("admin"), userController.getAllUsers);
+  .get(authController.restrictTo("super admin"), userController.getAllUsers);
 router.route("/getMe").get(userController.getMe, userController.getUser);
 
 router
@@ -20,6 +20,7 @@ router
   .delete(userController.getMe, userController.deleteUser);
 
 router.use(authController.restrictTo("admin"));
+router.use(authController.restrictTo("super Admin"));
 router
   .route("/:id")
   .get(userController.getUser)

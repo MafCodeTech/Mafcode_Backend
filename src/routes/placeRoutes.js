@@ -6,7 +6,11 @@ const router = express.Router();
 
 router
   .route("/")
-  .post(authController.protect, placeController.addPlace)
+  .post(
+    authController.protect,
+    authController.restrictTo("super Admin"),
+    placeController.addPlace
+  )
   .get(placeController.getPlaces);
 
 router
