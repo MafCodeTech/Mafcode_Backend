@@ -1,6 +1,67 @@
 import User from "../models/userModel.js";
 import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
+import cloudinary from "cloudinary";
+import sharp from "sharp";
+import multer from "multer";
+import stream from "stream";
+
+cloudinary.v2.config({
+  cloud_name: "dffsykenb",
+  api_key: "853689847542267",
+  api_secret: "P7WLaUPKmz2mf1E95Jp30ISJqjg",
+});
+
+const multerStorage = multer.memoryStorage();
+
+const multerFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith("image")) {
+    cb(null, true);
+  } else {
+    cb(new AppError("Not an image! Please upload only images.", 400), false);
+  }
+};
+
+const upload = multer({
+  storage: multerStorage,
+  fileFilter: multerFilter,
+});
+
+export const uploadUserPhoto = upload.single("profilePicture");
+
+export const resizeUserPhoto = catchAsync(async (req, res, next) => {
+  if (!req.file) return next();
+
+  // Generate the filename - handle both signup (no user) and update (with user) scenarios
+  const userId = req.user?._id || req.user?.id || 'new-user';
+  req.file.filename = `user-${userId}-${Date.now()}.jpeg`;
+
+  // Process the image buffer with Sharp
+  const buffer = await sharp(req.file.buffer)
+    .resize(500, 500)
+    .toFormat("jpeg")
+    .jpeg({ quality: 90 })
+    .toBuffer();
+
+  // Use a PassThrough stream to upload the image buffer to Cloudinary
+  const uploadStream = cloudinary.v2.uploader.upload_stream(
+    { folder: "users", public_id: req.file.filename },
+    (error, result) => {
+      if (error) {
+        return next(new AppError("Error uploading image to Cloudinary", 500));
+      }
+
+      // Set the Cloudinary URL on the request body
+      req.body.profilePicture = result.secure_url;
+      next();
+    }
+  );
+
+  // Pipe the processed image buffer to Cloudinary's upload stream
+  const bufferStream = new stream.PassThrough();
+  bufferStream.end(buffer);
+  bufferStream.pipe(uploadStream);
+});
 
 const filterObj = (obj, ...allowedFields) => {
   const newObj = {};
@@ -43,7 +104,7 @@ export const getUser = catchAsync(async (req, res, next) => {
 });
 
 export const getMe = (req, res, next) => {
-  req.params.id = req.user.id;
+  req.params.id = req.user._id || req.user.id;
   next();
 };
 
@@ -78,7 +139,7 @@ export const deleteUser = catchAsync(async (req, res, next) => {
 });
 
 export const deleteMe = catchAsync(async (req, res, next) => {
-  await User.findByIdAndUpdate(req.user.id, { active: false });
+  await User.findByIdAndUpdate(req.user._id || req.user.id, { active: false });
 
   res.status(204).json({
     status: "success",

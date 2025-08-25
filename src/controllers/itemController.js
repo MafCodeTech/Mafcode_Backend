@@ -1,6 +1,9 @@
 import Item from "../models/itemModel.js";
 import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
+import cloudinary from "cloudinary";
+import multer from "multer";
+import sharp from "sharp";
 
 export const createItem = catchAsync(async (req, res) => {
   const newItem = await Item.create({
