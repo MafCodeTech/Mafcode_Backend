@@ -95,7 +95,7 @@ export const getItemsByStatus = catchAsync(async (req, res, next) => {
     {
       $group: {
         _id: "null",
-        numItems: { $sum: 1 },
+        totalItems: { $sum: 1 },
         lost: { $sum: { $cond: [{ $eq: ["$status", "lost"] }, 1, 0] } },
         found: { $sum: { $cond: [{ $eq: ["$status", "found"] }, 1, 0] } },
         recovered: {
