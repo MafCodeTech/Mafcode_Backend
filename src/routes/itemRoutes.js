@@ -12,6 +12,7 @@ router
   .get(itemController.getAllItems);
 
 router.route("/my-items").get(itemController.getAllItemsForUSer);
+router.route("/status").get(itemController.getItemsByStatus);
 router
   .route("/:id")
   .get(itemController.getItem)

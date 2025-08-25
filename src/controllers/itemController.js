@@ -89,3 +89,33 @@ export const getItemsByType = catchAsync(async (req, res, next) => {
     },
   });
 });
+
+export const getItemsByStatus = catchAsync(async (req, res, next) => {
+  const items = await Item.aggregate([
+    {
+      $group: {
+        _id: "null",
+        numItems: { $sum: 1 },
+        lost: { $sum: { $cond: [{ $eq: ["$status", "lost"] }, 1, 0] } },
+        found: { $sum: { $cond: [{ $eq: ["$status", "found"] }, 1, 0] } },
+        recovered: {
+          $sum: { $cond: [{ $eq: ["$status", "recovered"] }, 1, 0] },
+        },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+      },
+    },
+  ]);
+  if (!items) {
+    return next(new AppError("No items found", 404));
+  }
+  res.status(200).json({
+    status: "success",
+    data: {
+      items,
+    },
+  });
+});
