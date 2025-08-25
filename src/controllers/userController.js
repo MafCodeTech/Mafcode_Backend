@@ -32,9 +32,8 @@ export const uploadUserPhoto = upload.single("profilePicture");
 export const resizeUserPhoto = catchAsync(async (req, res, next) => {
   if (!req.file) return next();
 
-  // Generate the filename - handle both signup (no user) and update (with user) scenarios
-  const userId = req.user?._id || req.user?.id || 'new-user';
-  req.file.filename = `user-${userId}-${Date.now()}.jpeg`;
+  // Generate the filename
+  req.file.filename = `user${req.user.id}-${Date.now()}.jpeg`;
 
   // Process the image buffer with Sharp
   const buffer = await sharp(req.file.buffer)
@@ -104,7 +103,7 @@ export const getUser = catchAsync(async (req, res, next) => {
 });
 
 export const getMe = (req, res, next) => {
-  req.params.id = req.user._id || req.user.id;
+  req.params.id = req.user.id;
   next();
 };
 
@@ -139,7 +138,7 @@ export const deleteUser = catchAsync(async (req, res, next) => {
 });
 
 export const deleteMe = catchAsync(async (req, res, next) => {
-  await User.findByIdAndUpdate(req.user._id || req.user.id, { active: false });
+  await User.findByIdAndUpdate(req.user.id, { active: false });
 
   res.status(204).json({
     status: "success",

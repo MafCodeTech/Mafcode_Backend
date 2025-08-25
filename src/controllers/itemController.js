@@ -4,6 +4,58 @@ import AppError from "../utils/appError.js";
 import cloudinary from "cloudinary";
 import multer from "multer";
 import sharp from "sharp";
+import stream from "stream";
+cloudinary.v2.config({
+  cloud_name: "dffsykenb",
+  api_key: "853689847542267",
+  api_secret: "P7WLaUPKmz2mf1E95Jp30ISJqjg",
+});
+
+const multerStorage = multer.memoryStorage();
+
+const multerFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith("image")) {
+    cb(null, true);
+  } else {
+    cb(new AppError("Not an image! Please upload only images.", 400), false);
+  }
+};
+
+const upload = multer({
+  storage: multerStorage,
+  fileFilter: multerFilter,
+});
+
+export const uploadItemImage = upload.single("Image");
+
+export const resizeImage = catchAsync(async (req, res, next) => {
+  if (!req.file) return next();
+
+  req.file.filename = `item${req.user.id}-${Date.now()}.jpeg`;
+
+  const buffer = await sharp(req.file.buffer)
+    .resize(500, 500)
+    .toFormat("jpeg")
+    .jpeg({ quality: 90 })
+    .toBuffer();
+
+  const uploadStream = cloudinary.v2.uploader.upload_stream(
+    { folder: "items", public_id: req.file.filename },
+    (error, result) => {
+      if (error) {
+        return next(new AppError("Error uploading image to Cloudinary", 500));
+      }
+
+      req.body.Image = result.secure_url;
+      next();
+    }
+  );
+
+  // Pipe the processed image buffer to Cloudinary's upload stream
+  const bufferStream = new stream.PassThrough();
+  bufferStream.end(buffer);
+  bufferStream.pipe(uploadStream);
+});
 
 export const createItem = catchAsync(async (req, res) => {
   const newItem = await Item.create({

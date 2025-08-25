@@ -8,7 +8,11 @@ router.use(protect);
 
 router
   .route("/")
-  .post(restrictTo("admin"), itemController.createItem)
+  .post(
+    itemController.uploadItemImage,
+    itemController.resizeImage,
+    itemController.createItem
+  )
   .get(itemController.getAllItems);
 
 router.route("/my-items").get(itemController.getAllItemsForUSer);
