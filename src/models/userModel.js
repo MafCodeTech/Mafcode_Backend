@@ -39,6 +39,10 @@ const userSchema = new mongoose.Schema(
       default: "user",
     },
     profilePicture: String,
+    qrCode: {
+      type: String,
+      default: "",
+    },
     createdAt: {
       type: Date,
       default: Date.now(),

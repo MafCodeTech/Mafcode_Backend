@@ -32,10 +32,8 @@ export const uploadUserPhoto = upload.single("profilePicture");
 export const resizeUserPhoto = catchAsync(async (req, res, next) => {
   if (!req.file) return next();
 
-  // Generate the filename
-  req.file.filename = `user${req.user.id}-${Date.now()}.jpeg`;
+  req.file.filename = `user-${Date.now()}.jpeg`;
 
-  // Process the image buffer with Sharp
   const buffer = await sharp(req.file.buffer)
     .resize(500, 500)
     .toFormat("jpeg")
@@ -50,7 +48,6 @@ export const resizeUserPhoto = catchAsync(async (req, res, next) => {
         return next(new AppError("Error uploading image to Cloudinary", 500));
       }
 
-      // Set the Cloudinary URL on the request body
       req.body.profilePicture = result.secure_url;
       next();
     }

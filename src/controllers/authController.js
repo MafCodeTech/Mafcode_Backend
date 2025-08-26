@@ -6,6 +6,7 @@ import AppError from "../utils/appError.js";
 import dotenv from "dotenv";
 import bcrypt from "bcrypt";
 import { token } from "morgan";
+import QRCode from "qrcode";
 
 dotenv.config();
 
@@ -16,7 +17,17 @@ const signToken = (id) => {
 };
 
 export const signUp = catchAsync(async (req, res) => {
+  // Create the user first
   const newUser = await User.create(req.body);
+
+  // Generate a QR code containing the user's unique _id
+  const qrData = newUser._id.toString();
+  const qrCodeUrl = await QRCode.toDataURL(qrData);
+
+  // Save the QR code URL to the user profile
+  newUser.qrCode = qrCodeUrl;
+  await newUser.save({ validateBeforeSave: false });
+
   const token = signToken(newUser._id);
   res.status(201).json({
     status: "success",
