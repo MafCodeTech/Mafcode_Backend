@@ -4,8 +4,6 @@ import catchAsync from "../utils/catchAsync.js";
 import { promisify } from "util";
 import AppError from "../utils/appError.js";
 import dotenv from "dotenv";
-import bcrypt from "bcrypt";
-import { token } from "morgan";
 import QRCode from "qrcode";
 
 dotenv.config();
