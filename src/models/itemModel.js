@@ -30,12 +30,7 @@ const itemSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
-    status: {
-      type: String,
-      enum: ["lost", "found", "recovered"],
-      default: "lost",
-      required: [true, "Status is required"],
-    },
+
     active: {
       type: Boolean,
       default: true,
