@@ -21,9 +21,9 @@ const itemSchema = new mongoose.Schema(
       required: [true, "Color is required"],
       trim: true,
     },
-    type: {
+    category: {
       type: String,
-      required: [true, "Type is required"],
+      required: [true, "Category is required"],
       trim: true,
     },
     createdBy: {
@@ -65,6 +65,14 @@ const itemSchema = new mongoose.Schema(
     },
   }
 );
+
+itemSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: "createdBy",
+    select: "-role",
+  });
+  next();
+});
 
 const Item = mongoose.model("Item", itemSchema);
 export default Item;
