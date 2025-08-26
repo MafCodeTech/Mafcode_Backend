@@ -16,11 +16,13 @@ router
   .get(itemController.getAllItems);
 
 router.route("/my-items").get(itemController.getAllItemsForUSer);
-router.route("/status").get(itemController.getItemsByStatus);
+router
+  .route("/status")
+  .get(restrictTo("admin", "super-admin"), itemController.getItemsByStatus);
 router
   .route("/:id")
   .get(itemController.getItem)
-  .patch(restrictTo("admin"), itemController.updateItem)
-  .delete(restrictTo("admin"), itemController.deleteItem);
+  .patch(itemController.updateItem)
+  .delete(itemController.deleteItem);
 
 export default router;
