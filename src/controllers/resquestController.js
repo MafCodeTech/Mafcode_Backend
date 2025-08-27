@@ -13,6 +13,8 @@ export const createRequest = catchAsync(async (req, res, next) => {
     color,
     status,
     model,
+    lostDate,
+    foundDate,
   } = req.body;
 
   const request = await requestModel.create({
@@ -25,6 +27,8 @@ export const createRequest = catchAsync(async (req, res, next) => {
     color,
     status,
     model,
+    lostDate,
+    foundDate,
     createdBy: req.user._id,
   });
 
