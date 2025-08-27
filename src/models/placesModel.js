@@ -28,6 +28,12 @@ const placeSchema = new mongoose.Schema(
     updatedAt: {
       type: Date,
     },
+    admins: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
   },
   {
     toJSON: {

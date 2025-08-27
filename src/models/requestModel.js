@@ -3,7 +3,7 @@ const requestSchema = new mongoose.Schema(
   {
     status: {
       type: String,
-      enum: ["lost", "found"],
+      enum: ["lost", "found", "recovered"],
       required: [true, "Status is required"],
       trim: true,
     },
@@ -20,11 +20,13 @@ const requestSchema = new mongoose.Schema(
       required: [true, "Description is required"],
       trim: true,
     },
-    Image: {
-      type: String,
-      // required: [true, "Image is required"],
-      trim: true,
-    },
+    Image: [
+      {
+        type: String,
+        // required: [true, "Image is required"],
+        trim: true,
+      },
+    ],
     color: {
       type: String,
     },
@@ -58,6 +60,18 @@ const requestSchema = new mongoose.Schema(
     },
     updatedAt: {
       type: Date,
+    },
+    lostDate: {
+      type: Date,
+      required: function () {
+        return this.status === "lost";
+      },
+    },
+    foundDate: {
+      type: Date,
+      required: function () {
+        return this.status === "found";
+      },
     },
   },
   {

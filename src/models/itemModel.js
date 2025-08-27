@@ -40,6 +40,14 @@ const itemSchema = new mongoose.Schema(
       required: [true, "Image is required"],
       trim: true,
     },
+    lostDate: {
+      type: Date,
+      required: [true, "Lost date is required"],
+    },
+    foundDate: {
+      type: Date,
+      required: [true, "Found date is required"],
+    },
   },
   {
     toJSON: {

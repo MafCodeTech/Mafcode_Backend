@@ -81,3 +81,43 @@ export const deletePlace = catchAsync(async (req, res, next) => {
     data: null,
   });
 });
+
+export const assignAdminsToPlace = catchAsync(async (req, res, next) => {
+  const { adminId } = req.body;
+
+  const place = await Place.findById(req.params.id);
+
+  if (!place) {
+    return next(new AppError("No place found with that ID", 404));
+  }
+
+  place.admins = adminId;
+  await place.save();
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      place,
+    },
+  });
+});
+
+export const removeAdminFromPlace = catchAsync(async (req, res, next) => {
+  const { adminId } = req.body;
+
+  const place = await Place.findById(req.params.id);
+
+  if (!place) {
+    return next(new AppError("No place found with that ID", 404));
+  }
+
+  place.admins.pull(adminId);
+  await place.save();
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      place,
+    },
+  });
+});
