@@ -20,11 +20,13 @@ const requestSchema = new mongoose.Schema(
       required: [true, "Description is required"],
       trim: true,
     },
-    Image: {
-      type: String,
-      // required: [true, "Image is required"],
-      trim: true,
-    },
+    Image: [
+      {
+        type: String,
+        // required: [true, "Image is required"],
+        trim: true,
+      },
+    ],
     color: {
       type: String,
     },
