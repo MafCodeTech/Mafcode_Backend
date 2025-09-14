@@ -5,7 +5,6 @@ import { protect, restrictTo } from "../controllers/authController.js";
 const router = Router();
 
 router.use(protect);
-
 router
   .route("/")
   .post(
@@ -14,6 +13,12 @@ router
     itemController.createItem
   )
   .get(itemController.getAllItems);
+
+// Link a hard copy QR code to an item (owner only, first scan)
+// router.post("/link-qrcode", itemController.linkQrCodeToItem);
+
+// Get item info by QR code (public)
+router.get("/by-qrcode/:qrCode", itemController.getItemByQrCode);
 
 router.route("/my-items").get(itemController.getAllItemsForUSer);
 router

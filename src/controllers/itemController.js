@@ -58,13 +58,29 @@ export const resizeImage = catchAsync(async (req, res, next) => {
   bufferStream.pipe(uploadStream);
 });
 
-export const createItem = catchAsync(async (req, res) => {
+export const createItem = catchAsync(async (req, res, next) => {
+  const { qrCode } = req.body;
+  if (!qrCode) {
+    return next(new AppError("QR code is required to create an item", 400));
+  }
+
+  // Check if QR code is already linked
+  const existing = await Item.findOne({ qrCode });
+  if (existing) {
+    return next(
+      new AppError("This QR code is already linked to another item", 400)
+    );
+  }
+
   const newItem = await Item.create({
     ...req.body,
     createdBy: req.user._id,
+    qrLinked: true,
   });
+
   res.status(201).json({
     status: "success",
+    message: "Item created and QR code linked successfully",
     data: {
       item: newItem,
     },
@@ -173,5 +189,56 @@ export const getItemsByStatus = catchAsync(async (req, res, next) => {
     data: {
       items,
     },
+  });
+});
+
+// // Link a hard copy QR code to an item (owner only, first scan)
+// export const linkQrCodeToItem = catchAsync(async (req, res, next) => {
+//   const { itemId, qrCode } = req.body;
+//   if (!itemId || !qrCode) {
+//     return next(new AppError("itemId and qrCode are required", 400));
+//   }
+
+//   // Find the item and check ownership
+//   const item = await Item.findById(itemId);
+//   if (!item) {
+//     return next(new AppError("Item not found", 404));
+//   }
+//   if (!item.createdBy.equals(req.user._id)) {
+//     return next(new AppError("You are not the owner of this item", 403));
+//   }
+//   if (item.qrLinked) {
+//     return next(new AppError("QR code already linked to this item", 400));
+//   }
+
+//   // Check if QR code is already linked to another item
+//   const existing = await Item.findOne({ qrCode });
+//   if (existing) {
+//     return next(
+//       new AppError("This QR code is already linked to another item", 400)
+//     );
+//   }
+
+//   item.qrCode = qrCode;
+//   item.qrLinked = true;
+//   await item.save();
+
+//   res.status(200).json({
+//     status: "success",
+//     message: "QR code linked to item successfully",
+//     data: { item },
+//   });
+// });
+
+// Get item info by QR code (public)
+export const getItemByQrCode = catchAsync(async (req, res, next) => {
+  const { qrCode } = req.params;
+  const item = await Item.findOne({ qrCode, qrLinked: true, active: true });
+  if (!item) {
+    return next(new AppError("No item found for this QR code", 404));
+  }
+  res.status(200).json({
+    status: "success",
+    data: { item },
   });
 });
