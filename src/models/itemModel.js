@@ -30,6 +30,15 @@ const itemSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
+    qrCode: {
+      type: String,
+      trim: true,
+      unique: true,
+    },
+    qrLinked: {
+      type: Boolean,
+      default: false,
+    },
 
     active: {
       type: Boolean,
@@ -39,14 +48,6 @@ const itemSchema = new mongoose.Schema(
       type: String,
       required: [true, "Image is required"],
       trim: true,
-    },
-    lostDate: {
-      type: Date,
-      required: [true, "Lost date is required"],
-    },
-    foundDate: {
-      type: Date,
-      required: [true, "Found date is required"],
     },
   },
   {
