@@ -56,7 +56,18 @@ const userSchema = new mongoose.Schema(
       select: false,
     },
     passwordChangedAt: Date,
+    phoneNumber: {
+      type: String,
+      required: [true, "Phone number is required"],
+      trim: true,
+      unique: true,
+    },
+    showPhoneNumber: {
+      type: Boolean,
+      default: false, // false = private, true = public
+    },
   },
+
   {
     toJSON: {
       virtuals: true,
