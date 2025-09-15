@@ -64,7 +64,11 @@ const userSchema = new mongoose.Schema(
     },
     showPhoneNumber: {
       type: Boolean,
-      default: false, // false = private, true = public
+      default: false,
+    },
+    showEmail: {
+      type: Boolean,
+      default: false,
     },
   },
 
