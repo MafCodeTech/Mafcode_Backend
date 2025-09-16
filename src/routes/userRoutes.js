@@ -19,6 +19,10 @@ router
   .route("/deleteMe")
   .delete(userController.getMe, userController.deleteUser);
 
+router.route("/user-info-visibility").patch(userController.updateVisibility);
+
+router.route("/qrCode").get(userController.getUserByQRCode);
+
 router.use(authController.restrictTo("super-admin"));
 router
   .route("/:id")

@@ -24,7 +24,10 @@ const userSchema = new mongoose.Schema(
 
     confirmPassword: {
       type: String,
-      required: [true, "Confirm password is required"],
+      required: function () {
+        return this.isNew; // Only required when creating
+      },
+
       trim: true,
       validate: {
         validator: function (el) {
@@ -69,6 +72,10 @@ const userSchema = new mongoose.Schema(
     showEmail: {
       type: Boolean,
       default: false,
+    },
+    showImage: {
+      type: Boolean,
+      default: true,
     },
   },
 

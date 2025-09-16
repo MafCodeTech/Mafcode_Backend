@@ -15,6 +15,7 @@ router
   .get(itemController.getAllItems);
 
 // Link a hard copy QR code to an item (owner only, first scan)
+
 // router.post("/link-qrcode", itemController.linkQrCodeToItem);
 
 // Get item info by QR code (public)

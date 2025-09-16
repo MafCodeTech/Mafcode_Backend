@@ -5,6 +5,7 @@ import cloudinary from "cloudinary";
 import sharp from "sharp";
 import multer from "multer";
 import stream from "stream";
+import { info } from "console";
 
 cloudinary.v2.config({
   cloud_name: "dffsykenb",
@@ -140,5 +141,59 @@ export const deleteMe = catchAsync(async (req, res, next) => {
   res.status(204).json({
     status: "success",
     data: null,
+  });
+});
+
+// get user using qr code
+export const getUserByQRCode = catchAsync(async (req, res, next) => {
+  const { qrCode } = req.body;
+  const user = await User.findOne({ qrCode, active: true });
+
+  if (!user) {
+    return next(new AppError("User not found with that QR code", 404));
+  }
+
+  const publicUser = {
+    id: user.id,
+    name: user.name,
+    // qrCode: user.qrCode,
+
+    // if user.showEmail is true, include email in the response
+    ...(user.showEmail && { email: user.email }),
+    ...(user.showPhoneNumber && { phoneNumber: user.phoneNumber }),
+    ...(user.showImage && { profilePicture: user.profilePicture }),
+  };
+
+  res.status(200).json({
+    status: "success",
+    data: { user: publicUser },
+  });
+});
+
+export const updateVisibility = catchAsync(async (req, res, next) => {
+  const { showEmail, showPhoneNumber, showImage } = req.body;
+
+  const updatedUser = await User.findByIdAndUpdate(
+    req.user.id,
+    {
+      ...(showEmail !== undefined && { showEmail }),
+      ...(showPhoneNumber !== undefined && { showPhoneNumber }),
+      ...(showImage !== undefined && { showImage }),
+    },
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+
+  if (!updatedUser) {
+    return next(new AppError("User not found", 404));
+  }
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      user: updatedUser,
+    },
   });
 });
