@@ -73,7 +73,7 @@ const itemSchema = new mongoose.Schema(
 itemSchema.pre(/^find/, function (next) {
   this.populate({
     path: "createdBy",
-    select: "-role",
+    select: "name email phoneNumber profilePicture ",
   });
   next();
 });

@@ -233,7 +233,11 @@ export const getItemsByStatus = catchAsync(async (req, res, next) => {
 // Get item info by QR code (public)
 export const getItemByQrCode = catchAsync(async (req, res, next) => {
   const { qrCode } = req.params;
-  const item = await Item.findOne({ qrCode, qrLinked: true, active: true });
+  const item = await Item.findOne({
+    qrCode,
+    qrLinked: true,
+    active: true,
+  });
   if (!item) {
     return next(new AppError("No item found for this QR code", 404));
   }
