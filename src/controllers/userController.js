@@ -86,7 +86,7 @@ export const getAllUsers = catchAsync(async (req, res, next) => {
 });
 
 export const getUser = catchAsync(async (req, res, next) => {
-  const user = await User.findById(req.params.id);
+  const user = await User.findById(req.params.id, { active: true });
 
   if (!user) {
     return next(new AppError("User not found", 404));
@@ -106,7 +106,16 @@ export const getMe = (req, res, next) => {
 };
 
 export const updateUser = catchAsync(async (req, res, next) => {
-  const filteredBody = filterObj(req.body, "name", "email", "phone");
+  const filteredBody = filterObj(
+    req.body,
+    "name",
+    "email",
+    "phone",
+    " profilePicture",
+    "showEmail",
+    "showPhoneNumber",
+    "showImage"
+  );
   const updatedUser = await User.findByIdAndUpdate(
     req.params.id,
     filteredBody,
