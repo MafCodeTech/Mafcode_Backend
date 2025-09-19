@@ -162,47 +162,47 @@ export const getUserByQRCode = catchAsync(async (req, res, next) => {
     return next(new AppError("User not found with that QR code", 404));
   }
 
-  const publicUser = {
-    id: user.id,
-    name: user.name,
-    // qrCode: user.qrCode,
+  // const publicUser = {
+  //   id: user.id,
+  //   name: user.name,
+  //   // qrCode: user.qrCode,
 
-    // if user.showEmail is true, include email in the response
-    ...(user.showEmail && { email: user.email }),
-    ...(user.showPhoneNumber && { phoneNumber: user.phoneNumber }),
-    ...(user.showImage && { profilePicture: user.profilePicture }),
-  };
-
-  res.status(200).json({
-    status: "success",
-    data: { user: publicUser },
-  });
-});
-
-export const updateVisibility = catchAsync(async (req, res, next) => {
-  const { showEmail, showPhoneNumber, showImage } = req.body;
-
-  const updatedUser = await User.findByIdAndUpdate(
-    req.user.id,
-    {
-      ...(showEmail !== undefined && { showEmail }),
-      ...(showPhoneNumber !== undefined && { showPhoneNumber }),
-      ...(showImage !== undefined && { showImage }),
-    },
-    {
-      new: true,
-      runValidators: true,
-    }
-  );
-
-  if (!updatedUser) {
-    return next(new AppError("User not found", 404));
-  }
+  //   // if user.showEmail is true, include email in the response
+  //   ...(user.showEmail && { email: user.email }),
+  //   ...(user.showPhoneNumber && { phoneNumber: user.phoneNumber }),
+  //   ...(user.showImage && { profilePicture: user.profilePicture }),
+  // };
 
   res.status(200).json({
     status: "success",
-    data: {
-      user: updatedUser,
-    },
+    data: user,
   });
 });
+
+// export const updateVisibility = catchAsync(async (req, res, next) => {
+//   const { showEmail, showPhoneNumber, showImage } = req.body;
+
+//   const updatedUser = await User.findByIdAndUpdate(
+//     req.user.id,
+//     {
+//       ...(showEmail !== undefined && { showEmail }),
+//       ...(showPhoneNumber !== undefined && { showPhoneNumber }),
+//       ...(showImage !== undefined && { showImage }),
+//     },
+//     {
+//       new: true,
+//       runValidators: true,
+//     }
+//   );
+
+//   if (!updatedUser) {
+//     return next(new AppError("User not found", 404));
+//   }
+
+//   res.status(200).json({
+//     status: "success",
+//     data: {
+//       user: updatedUser,
+//     },
+//   });
+// });

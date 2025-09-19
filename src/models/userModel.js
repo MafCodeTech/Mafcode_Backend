@@ -65,18 +65,18 @@ const userSchema = new mongoose.Schema(
       trim: true,
       unique: true,
     },
-    showPhoneNumber: {
-      type: Boolean,
-      default: false,
-    },
-    showEmail: {
-      type: Boolean,
-      default: false,
-    },
-    showImage: {
-      type: Boolean,
-      default: true,
-    },
+    // showPhoneNumber: {
+    //   type: Boolean,
+    //   default: false,
+    // },
+    // showEmail: {
+    //   type: Boolean,
+    //   default: false,
+    // },
+    // showImage: {
+    //   type: Boolean,
+    //   default: true,
+    // },
   },
 
   {
