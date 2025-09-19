@@ -22,9 +22,9 @@ const itemSchema = new mongoose.Schema(
       trim: true,
     },
     category: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Category",
       required: [true, "Category is required"],
-      trim: true,
     },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
@@ -74,6 +74,9 @@ itemSchema.pre(/^find/, function (next) {
   this.populate({
     path: "createdBy",
     select: "name email phoneNumber profilePicture ",
+  }).populate({
+    path: "category",
+    select: "name",
   });
   next();
 });
