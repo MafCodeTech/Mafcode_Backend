@@ -85,6 +85,7 @@ export const createRequest = catchAsync(async (req, res, next) => {
     model,
     lostDate,
     foundDate,
+    category,
   } = req.body;
 
   const request = await requestModel.create({
@@ -99,6 +100,7 @@ export const createRequest = catchAsync(async (req, res, next) => {
     model,
     lostDate,
     foundDate,
+    category,
     createdBy: req.user._id,
   });
 

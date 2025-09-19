@@ -12,8 +12,9 @@ const requestSchema = new mongoose.Schema(
       default: false,
     },
     category: {
-      type: String,
-      trim: true,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Category",
+      required: [true, "Category is required"],
     },
     description: {
       type: String,
@@ -23,8 +24,6 @@ const requestSchema = new mongoose.Schema(
     Image: [
       {
         type: String,
-        // required: [true, "Image is required"],
-        trim: true,
       },
     ],
     color: {
@@ -41,7 +40,7 @@ const requestSchema = new mongoose.Schema(
     location: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Place",
-      // required: [true, "Location is required"],
+      required: [true, "Location is required"],
       trim: true,
     },
     model: {
@@ -93,6 +92,17 @@ const requestSchema = new mongoose.Schema(
     },
   }
 );
+
+requestSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: "createdBy",
+    select: "name email phoneNumber profilePicture",
+  }).populate({
+    path: "category",
+    select: "name",
+  });
+  next();
+});
 
 const Request = mongoose.model("Request", requestSchema);
 export default Request;

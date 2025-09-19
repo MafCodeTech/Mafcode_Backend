@@ -7,7 +7,7 @@ const router = express.Router();
 router.use(authController.protect);
 router
   .route("/")
-  .post(authController.restrictTo("super Admin"), placeController.addPlace)
+  .post(authController.restrictTo("super-admin"), placeController.addPlace)
   .get(placeController.getPlaces);
 
 router

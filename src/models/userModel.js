@@ -65,18 +65,6 @@ const userSchema = new mongoose.Schema(
       trim: true,
       unique: true,
     },
-    // showPhoneNumber: {
-    //   type: Boolean,
-    //   default: false,
-    // },
-    // showEmail: {
-    //   type: Boolean,
-    //   default: false,
-    // },
-    // showImage: {
-    //   type: Boolean,
-    //   default: true,
-    // },
   },
 
   {
@@ -123,6 +111,11 @@ userSchema.methods.changePasswordAfter = function (JWTTimestamp) {
   return false;
 };
 
+userSchema.pre(/^find/, function (next) {
+  // this points to the current query
+  this.find({ active: { $ne: false } });
+  next();
+});
 const User = mongoose.model("User", userSchema);
 
 export default User;
