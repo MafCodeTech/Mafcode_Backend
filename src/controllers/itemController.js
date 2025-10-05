@@ -5,6 +5,7 @@ import cloudinary from "cloudinary";
 import multer from "multer";
 import sharp from "sharp";
 import stream from "stream";
+import APIFeatures from "../utils/apiFeatures.js";
 
 cloudinary.v2.config({
   cloud_name: "dffsykenb",
@@ -99,7 +100,15 @@ export const getAllItemsForUSer = catchAsync(async (req, res) => {
 });
 
 export const getAllItems = catchAsync(async (req, res) => {
-  const items = await Item.find({ active: true });
+  // Always filter by active items
+  let filter = { active: true };
+
+  const features = new APIFeatures(Item.find(filter), req.query)
+    .filter()
+    .sort()
+    .limitFields()
+    .pagination();
+  const items = await features.query;
   res.status(200).json({
     status: "success",
     results: items.length,

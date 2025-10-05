@@ -5,6 +5,7 @@ import cloudinary from "cloudinary";
 import sharp from "sharp";
 import multer from "multer";
 import stream from "stream";
+import APIFeatures from "../utils/apiFeatures.js";
 
 cloudinary.v2.config({
   cloud_name: "dffsykenb",
@@ -113,11 +114,15 @@ export const createRequest = catchAsync(async (req, res, next) => {
 });
 
 export const getAllRequests = catchAsync(async (req, res, next) => {
-  const requests = await requestModel
-    .find({ isDeleted: false })
-    .populate("createdBy")
-    .sort({ createdAt: -1 });
-
+  const features = new APIFeatures(
+    requestModel.find({ isDeleted: false }).populate("createdBy").populate("location"),
+    req.query
+  )
+    .filter()
+    .sort()
+    .limitFields()
+    .pagination();
+  const requests = await features.query;
   res.status(200).json({
     status: "success",
     results: requests.length,
@@ -126,6 +131,7 @@ export const getAllRequests = catchAsync(async (req, res, next) => {
     },
   });
 });
+
 
 export const getRequestById = catchAsync(async (req, res, next) => {
   const request = await requestModel
@@ -213,4 +219,3 @@ export const getRequestByPlace = catchAsync(async (req, res, next) => {
     },
   });
 });
-
