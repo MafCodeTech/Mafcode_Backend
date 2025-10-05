@@ -199,3 +199,18 @@ export const getMyRequests = catchAsync(async (req, res, next) => {
     },
   });
 });
+
+export const getRequestByPlace = catchAsync(async (req, res, next) => {
+  const requests = await requestModel
+    .find( { location: req.params.id, isDeleted: false } )
+    .populate("createdBy")
+    .sort({ createdAt: -1 });
+  res.status(200).json({
+    status: "success",
+    results: requests.length,
+    data: {
+      requests,
+    },
+  });
+});
+
