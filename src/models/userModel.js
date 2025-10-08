@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import validator from "validator";
+import crypto from "crypto"
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -65,6 +66,8 @@ const userSchema = new mongoose.Schema(
       trim: true,
       unique: true,
     },
+    verificationCode:String,
+    verificationCodeExpires:Date
   },
 
   {
@@ -110,6 +113,15 @@ userSchema.methods.changePasswordAfter = function (JWTTimestamp) {
   }
   return false;
 };
+
+userSchema.methods.createVerificationCode = function(){
+  const code = Math.floor(1000,Math.random,9000).toString()
+  this.verificationCode = crypto.createHash("sha256").update(code).digest("hex")
+  console.log(code,this.verificationCode);
+  this.verificationCodeExpires = Date.now() + 10*60*1000
+  return code;
+  
+}
 
 userSchema.pre(/^find/, function (next) {
   // this points to the current query

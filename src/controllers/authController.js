@@ -5,6 +5,7 @@ import { promisify } from "util";
 import AppError from "../utils/appError.js";
 import dotenv from "dotenv";
 import QRCode from "qrcode";
+import crypto from "crypto";
 
 dotenv.config();
 
@@ -96,3 +97,23 @@ export const restrictTo = (...roles) => {
     next();
   };
 };
+
+export const verifyOTP = catchAsync(async (req, res, next) => {
+  const { email, otp } = req.body;
+
+  const user = await User.findOne({ email });
+  if (!user) {
+    return next(new AppError("user not found ", 404));
+  }
+  const hashedCode = crypto.createHash("sh256").update(otp).digest("hex");
+  if (
+    user.verificationCode !== hashedCode ||
+    user.verificationCodeExpires < Date.now()
+  ) {
+    return next(new AppError("Invalid or expired OTP.", 400));
+  }
+  res.status(200).json({
+    status: "success",
+    message: "otp verified successfully",
+  });
+});
