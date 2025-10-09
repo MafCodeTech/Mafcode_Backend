@@ -5,6 +5,7 @@ import { promisify } from "util";
 import AppError from "../utils/appError.js";
 import dotenv from "dotenv";
 import QRCode from "qrcode";
+import { sendOtpEmail } from "../utils/email.js";
 import crypto from "crypto";
 import bcrypt from "bcrypt"
 
@@ -15,6 +16,29 @@ const signToken = (id) => {
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
 };
+const createSendToken = (user, statusCode, res) => {
+  const token = signToken(user._id);
+  const cookieOptions = {
+    expires: new Date(
+      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
+    ),
+    httpOnly: true,
+  };
+
+  if (process.env.NODE_ENV === "production") {
+    cookieOptions.secure = true;
+  } else {
+    cookieOptions.secure = false;
+  }
+
+  res.cookie("jwt", token, cookieOptions);
+  user.password = undefined;
+  return res.status(statusCode).json({
+    status: "success",
+    token,
+  });
+};
+
 
 export const signUp = catchAsync(async (req, res) => {
   // Create the user first
@@ -128,34 +152,23 @@ export const forgetPassword = catchAsync(async (req, res, next) => {
   const verificationCode = user.createVerificationCode();
   await user.save({ validateBeforeSave: false });
 
+  try {
+    await sendOtpEmail({ to: user.email, code: verificationCode, appName: process.env.APP_NAME || 'Mafcode' });
+  } catch (err) {
+    // In case of failure, remove code and expiration so it cannot be used
+    console.error('Email send error:', err && err.message ? err.message : err);
+    user.verificationCode = undefined;
+    user.verificationCodeExpires = undefined;
+    await user.save({ validateBeforeSave: false });
+    return next(new AppError("There was an error sending the email. Try again later.", 500));
+  }
+
   res.status(200).json({
     status: "success",
     message: "Verification code sent to email!",
     // code: verificationCode, // In production, do not send the code in the response
   });
 });
-const createSendToken = (user, statusCode, res) => {
-  const token = signToken(user._id);
-  const cookieOptions = {
-    expires: new Date(
-      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
-    ),
-    httpOnly: true,
-  };
-
-  if (process.env.NODE_ENV === "production") {
-    cookieOptions.secure = true;
-  } else {
-    cookieOptions.secure = false;
-  }
-
-  res.cookie("jwt", token, cookieOptions);
-  user.password = undefined;
-  return res.status(statusCode).json({
-    status: "success",
-    token,
-  });
-};
 
 export const resetPassword = catchAsync(async (req, res, next) => {
   const { email, password, confirmPassword, otp } = req.body;
