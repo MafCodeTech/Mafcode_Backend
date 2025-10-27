@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
+import http from "http";
 import app from "./app.js";
 import dotenv from "dotenv";
+import initSocket from "./socket.js";
 
 dotenv.config();
 const DB_URI = process.env.DATABASE_URL;
@@ -14,6 +16,11 @@ mongoose
 
 const port = process.env.PORT || 9000;
 
-app.listen(port, () => {
+const server = http.createServer(app);
+
+// Initialize Socket.IO handlers
+initSocket(server);
+
+server.listen(port, () => {
   console.log("Server is running on port " + port);
 });

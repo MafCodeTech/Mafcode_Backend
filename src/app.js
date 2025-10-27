@@ -9,6 +9,8 @@ import itemRoutes from "./routes/itemRoutes.js";
 import placeRoutes from "./routes/placeRoutes.js";
 import requestRoutes from "./routes/requestRoute.js";
 import categoryRoutes from "./routes/categoryRoute.js";
+import messageRoutes from "./routes/messageRoute.js";
+import chatRoutes from "./routes/chatRoutes.js";
 const app = express();
 
 app.use(cors());
@@ -22,6 +24,8 @@ app.use("/api/v1/items", itemRoutes);
 app.use("/api/v1/places", placeRoutes);
 app.use("/api/v1/requests", requestRoutes);
 app.use("/api/v1/categories", categoryRoutes);
+app.use("/api/v1/messages", messageRoutes);
+app.use("/api/v1/chat", chatRoutes);
 
 app.all("*", (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
