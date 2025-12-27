@@ -1,5 +1,4 @@
 import cloudinary from "cloudinary";
-import { info } from "console";
 import multer from "multer";
 import sharp from "sharp";
 import stream from "stream";
@@ -9,9 +8,9 @@ import AppError from "../utils/appError.js";
 import catchAsync from "../utils/catchAsync.js";
 
 cloudinary.v2.config({
-  cloud_name: "dffsykenb",
-  api_key: "853689847542267",
-  api_secret: "P7WLaUPKmz2mf1E95Jp30ISJqjg",
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
 const multerStorage = multer.memoryStorage();
