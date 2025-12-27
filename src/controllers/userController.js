@@ -1,11 +1,12 @@
-import User from "../models/userModel.js";
-import catchAsync from "../utils/catchAsync.js";
-import AppError from "../utils/appError.js";
 import cloudinary from "cloudinary";
-import sharp from "sharp";
-import multer from "multer";
-import stream from "stream";
 import { info } from "console";
+import multer from "multer";
+import sharp from "sharp";
+import stream from "stream";
+
+import User from "../models/userModel.js";
+import AppError from "../utils/appError.js";
+import catchAsync from "../utils/catchAsync.js";
 
 cloudinary.v2.config({
   cloud_name: "dffsykenb",
@@ -62,7 +63,7 @@ export const resizeUserPhoto = catchAsync(async (req, res, next) => {
 
 const filterObj = (obj, ...allowedFields) => {
   const newObj = {};
-  Object.keys(obj).forEach((el) => {
+  Object.keys(obj).forEach(el => {
     if (allowedFields.includes(el)) newObj[el] = obj[el];
   });
   return newObj;
@@ -72,9 +73,7 @@ export const getAllUsers = catchAsync(async (req, res, next) => {
   const page = req.query.page * 1 || 1;
   const limit = req.query.limit * 1 || 100;
   const skip = (page - 1) * limit;
-  const users = await User.find({ active: true, role: "user" })
-    .skip(skip)
-    .limit(limit);
+  const users = await User.find({ active: true, role: "user" }).skip(skip).limit(limit);
 
   res.status(200).json({
     status: "success",
@@ -116,14 +115,10 @@ export const updateUser = catchAsync(async (req, res, next) => {
     "showPhoneNumber",
     "showImage"
   );
-  const updatedUser = await User.findByIdAndUpdate(
-    req.params.id,
-    filteredBody,
-    {
-      new: true,
-      runValidators: true,
-    }
-  );
+  const updatedUser = await User.findByIdAndUpdate(req.params.id, filteredBody, {
+    new: true,
+    runValidators: true,
+  });
   if (!updatedUser) {
     return next(new AppError("User not found", 404));
   }

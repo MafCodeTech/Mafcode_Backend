@@ -1,11 +1,12 @@
-import Item from "../models/itemModel.js";
-import catchAsync from "../utils/catchAsync.js";
-import AppError from "../utils/appError.js";
 import cloudinary from "cloudinary";
 import multer from "multer";
 import sharp from "sharp";
 import stream from "stream";
+
+import Item from "../models/itemModel.js";
 import APIFeatures from "../utils/apiFeatures.js";
+import AppError from "../utils/appError.js";
+import catchAsync from "../utils/catchAsync.js";
 
 cloudinary.v2.config({
   cloud_name: "dffsykenb",
@@ -68,9 +69,7 @@ export const createItem = catchAsync(async (req, res, next) => {
   // Check if QR code is already linked
   const existing = await Item.findOne({ qrCode });
   if (existing) {
-    return next(
-      new AppError("This QR code is already linked to another item", 400)
-    );
+    return next(new AppError("This QR code is already linked to another item", 400));
   }
 
   const newItem = await Item.create({

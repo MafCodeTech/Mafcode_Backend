@@ -1,6 +1,7 @@
 import express from "express";
-import * as requestController from "../controllers/requestController.js";
+
 import * as authController from "../controllers/authController.js";
+import * as requestController from "../controllers/requestController.js";
 
 const router = express.Router();
 
@@ -15,7 +16,7 @@ router
   );
 
 router.route("/my-requests").get(requestController.getMyRequests);
-router.route("/place/:id").get(requestController.getRequestByPlace)
+router.route("/place/:id").get(requestController.getRequestByPlace);
 
 router
   .route("/:id")

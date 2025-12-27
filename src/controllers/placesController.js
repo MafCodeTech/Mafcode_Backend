@@ -1,6 +1,6 @@
 import Place from "../models/placesModel.js";
-import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
+import catchAsync from "../utils/catchAsync.js";
 
 export const addPlace = catchAsync(async (req, res, next) => {
   const { name, description } = req.body;

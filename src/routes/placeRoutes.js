@@ -1,6 +1,7 @@
 import express from "express";
-import * as placeController from "../controllers/placesController.js";
+
 import * as authController from "../controllers/authController.js";
+import * as placeController from "../controllers/placesController.js";
 
 const router = express.Router();
 
@@ -12,14 +13,8 @@ router
 
 router
   .route("/:id/admins")
-  .post(
-    authController.restrictTo("super-admin"),
-    placeController.assignAdminsToPlace
-  )
-  .delete(
-    authController.restrictTo("super-admin"),
-    placeController.removeAdminFromPlace
-  );
+  .post(authController.restrictTo("super-admin"), placeController.assignAdminsToPlace)
+  .delete(authController.restrictTo("super-admin"), placeController.removeAdminFromPlace);
 
 router
   .route("/:id")

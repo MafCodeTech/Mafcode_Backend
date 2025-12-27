@@ -1,11 +1,12 @@
-import requestModel from "../models/requestModel.js";
-import catchAsync from "../utils/catchAsync.js";
-import AppError from "../utils/appError.js";
 import cloudinary from "cloudinary";
-import sharp from "sharp";
 import multer from "multer";
+import sharp from "sharp";
 import stream from "stream";
+
+import requestModel from "../models/requestModel.js";
 import APIFeatures from "../utils/apiFeatures.js";
+import AppError from "../utils/appError.js";
+import catchAsync from "../utils/catchAsync.js";
 
 cloudinary.v2.config({
   cloud_name: "dffsykenb",
@@ -27,13 +28,11 @@ const upload = multer({
   fileFilter: multerFilter,
 });
 
-export const uploadRequestImages = upload.fields([
-  { name: "Image", maxCount: 3 },
-]);
+export const uploadRequestImages = upload.fields([{ name: "Image", maxCount: 3 }]);
 // upload it on cloudinary
 export const resizeRequestImages = catchAsync(async (req, res, next) => {
   if (!req.files.Image) return next();
-  const imagePromises = req.files.Image.map(async (file) => {
+  const imagePromises = req.files.Image.map(async file => {
     const filename = `request-${req.user.id}-${Date.now()}.jpeg`;
 
     // 1. Process image
@@ -49,9 +48,7 @@ export const resizeRequestImages = catchAsync(async (req, res, next) => {
         { folder: "requests", public_id: filename },
         (error, result) => {
           if (error) {
-            return reject(
-              new AppError("Error uploading image to Cloudinary", 500)
-            );
+            return reject(new AppError("Error uploading image to Cloudinary", 500));
           }
           resolve(result.secure_url);
         }
@@ -132,7 +129,6 @@ export const getAllRequests = catchAsync(async (req, res, next) => {
   });
 });
 
-
 export const getRequestById = catchAsync(async (req, res, next) => {
   const request = await requestModel
     .findById(req.params.id)
@@ -152,14 +148,10 @@ export const getRequestById = catchAsync(async (req, res, next) => {
 });
 
 export const updateRequest = catchAsync(async (req, res, next) => {
-  const request = await requestModel.findByIdAndUpdate(
-    req.params.id,
-    req.body,
-    {
-      new: true,
-      runValidators: true,
-    }
-  );
+  const request = await requestModel.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+    runValidators: true,
+  });
 
   if (!request) {
     return next(new AppError("No request found with that ID", 404));
@@ -208,7 +200,7 @@ export const getMyRequests = catchAsync(async (req, res, next) => {
 
 export const getRequestByPlace = catchAsync(async (req, res, next) => {
   const requests = await requestModel
-    .find( { location: req.params.id, isDeleted: false } )
+    .find({ location: req.params.id, isDeleted: false })
     .populate("createdBy")
     .sort({ createdAt: -1 });
   res.status(200).json({

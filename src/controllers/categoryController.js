@@ -1,7 +1,6 @@
 import Category from "../models/categoryModel.js";
-
-import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
+import catchAsync from "../utils/catchAsync.js";
 
 export const getAllCategories = catchAsync(async (req, res, next) => {
   const categories = await Category.find();

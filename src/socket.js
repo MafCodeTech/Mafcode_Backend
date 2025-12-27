@@ -1,14 +1,15 @@
-import { Server } from "socket.io";
 import jwt from "jsonwebtoken";
-import User from "./models/userModel.js";
+import { Server } from "socket.io";
+
 import Message from "./models/messageModel.js";
+import User from "./models/userModel.js";
 
 export function initSocket(server) {
   const io = new Server(server, {
     cors: {
-      origin: '*',
-      methods: ['GET', 'POST']
-    }
+      origin: "*",
+      methods: ["GET", "POST"],
+    },
   });
 
   // Map of userId => socketId
@@ -20,7 +21,7 @@ export function initSocket(server) {
       if (!token) return next();
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       const user = await User.findById(decoded.id);
-      if (!user) return next(new Error('Authentication error'));
+      if (!user) return next(new Error("Authentication error"));
       socket.userId = user._id.toString();
       return next();
     } catch (err) {
@@ -28,7 +29,7 @@ export function initSocket(server) {
     }
   });
 
-  io.on('connection', (socket) => {
+  io.on("connection", socket => {
     if (socket.userId) {
       onlineUsers.set(socket.userId, socket.id);
       console.log(`User ${socket.userId} connected (socket ${socket.id})`);
@@ -36,17 +37,17 @@ export function initSocket(server) {
       console.log(`Unauthenticated socket connected: ${socket.id}`);
     }
 
-    socket.on('private_message', async (payload, ack) => {
+    socket.on("private_message", async (payload, ack) => {
       try {
-        if (!socket.userId) return ack && ack({ error: 'Not authenticated' });
+        if (!socket.userId) return ack && ack({ error: "Not authenticated" });
         const { to, content } = payload;
-        if (!to || !content) return ack && ack({ error: 'Invalid payload' });
+        if (!to || !content) return ack && ack({ error: "Invalid payload" });
 
         const message = await Message.create({ sender: socket.userId, recipient: to, content });
 
         const recipientSocketId = onlineUsers.get(to);
         if (recipientSocketId) {
-          io.to(recipientSocketId).emit('private_message', {
+          io.to(recipientSocketId).emit("private_message", {
             _id: message._id,
             sender: message.sender,
             recipient: message.recipient,
@@ -55,20 +56,24 @@ export function initSocket(server) {
           });
         }
 
-        ack && ack({ status: 'ok', message: {
-          _id: message._id,
-          sender: message.sender,
-          recipient: message.recipient,
-          content: message.content,
-          createdAt: message.createdAt,
-        }});
+        ack &&
+          ack({
+            status: "ok",
+            message: {
+              _id: message._id,
+              sender: message.sender,
+              recipient: message.recipient,
+              content: message.content,
+              createdAt: message.createdAt,
+            },
+          });
       } catch (err) {
-        console.error('private_message error', err);
-        ack && ack({ error: 'Could not send message' });
+        console.error("private_message error", err);
+        ack && ack({ error: "Could not send message" });
       }
     });
 
-    socket.on('disconnect', () => {
+    socket.on("disconnect", () => {
       if (socket.userId) {
         onlineUsers.delete(socket.userId);
         console.log(`User ${socket.userId} disconnected`);

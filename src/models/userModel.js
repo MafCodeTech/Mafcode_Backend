@@ -1,7 +1,8 @@
-import mongoose from "mongoose";
 import bcrypt from "bcrypt";
+import crypto from "crypto";
+import mongoose from "mongoose";
 import validator from "validator";
-import crypto from "crypto"
+
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -66,8 +67,8 @@ const userSchema = new mongoose.Schema(
       trim: true,
       unique: true,
     },
-    verificationCode:String,
-    verificationCodeExpires:Date
+    verificationCode: String,
+    verificationCodeExpires: Date,
   },
 
   {
@@ -96,32 +97,25 @@ userSchema.pre("save", async function (next) {
   this.confirmPassword = undefined;
 });
 
-userSchema.methods.correctPassword = async function (
-  candidatePassword,
-  userPassword
-) {
+userSchema.methods.correctPassword = async function (candidatePassword, userPassword) {
   return await bcrypt.compare(candidatePassword, userPassword);
 };
 
 userSchema.methods.changePasswordAfter = function (JWTTimestamp) {
   if (this.passwordChangedAt) {
-    const changedTimestamp = parseInt(
-      this.passwordChangedAt.getTime() / 1000,
-      10
-    );
+    const changedTimestamp = parseInt(this.passwordChangedAt.getTime() / 1000, 10);
     return JWTTimestamp < changedTimestamp;
   }
   return false;
 };
 
-userSchema.methods.createVerificationCode = function(){
-  const code = Math.floor(1000 + Math.random() * 9000).toString()
-  this.verificationCode = crypto.createHash("sha256").update(code).digest("hex")
-  console.log(code,this.verificationCode);
-  this.verificationCodeExpires = Date.now() + 10*60*1000
+userSchema.methods.createVerificationCode = function () {
+  const code = Math.floor(1000 + Math.random() * 9000).toString();
+  this.verificationCode = crypto.createHash("sha256").update(code).digest("hex");
+  console.log(code, this.verificationCode);
+  this.verificationCodeExpires = Date.now() + 10 * 60 * 1000;
   return code;
-  
-}
+};
 
 userSchema.pre(/^find/, function (next) {
   // this points to the current query

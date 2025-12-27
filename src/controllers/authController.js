@@ -1,17 +1,18 @@
-import User from "../models/userModel.js";
-import jwt from "jsonwebtoken";
-import catchAsync from "../utils/catchAsync.js";
-import { promisify } from "util";
-import AppError from "../utils/appError.js";
-import dotenv from "dotenv";
-import QRCode from "qrcode";
-import { sendOtpEmail } from "../utils/email.js";
+import bcrypt from "bcrypt";
 import crypto from "crypto";
-import bcrypt from "bcrypt"
+import dotenv from "dotenv";
+import jwt from "jsonwebtoken";
+import QRCode from "qrcode";
+import { promisify } from "util";
+
+import User from "../models/userModel.js";
+import AppError from "../utils/appError.js";
+import catchAsync from "../utils/catchAsync.js";
+import { sendOtpEmail } from "../utils/email.js";
 
 dotenv.config();
 
-const signToken = (id) => {
+const signToken = id => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
@@ -19,9 +20,7 @@ const signToken = (id) => {
 const createSendToken = (user, statusCode, res) => {
   const token = signToken(user._id);
   const cookieOptions = {
-    expires: new Date(
-      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
-    ),
+    expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000),
     httpOnly: true,
   };
 
@@ -38,7 +37,6 @@ const createSendToken = (user, statusCode, res) => {
     token,
   });
 };
-
 
 export const signUp = catchAsync(async (req, res) => {
   // Create the user first
@@ -80,32 +78,20 @@ export const login = catchAsync(async (req, res, next) => {
 
 export const protect = catchAsync(async (req, res, next) => {
   let token;
-  if (
-    req.headers.authorization &&
-    req.headers.authorization.startsWith("Bearer")
-  ) {
+  if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
     token = req.headers.authorization.split(" ")[1];
   }
   if (!token) {
-    return next(
-      new AppError("You are not logged in! Please log in to get access.", 401)
-    );
+    return next(new AppError("You are not logged in! Please log in to get access.", 401));
   }
   const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
   const currentUser = await User.findById(decoded.id);
   if (!currentUser) {
-    return next(
-      new AppError(
-        "The user belonging to this token does no longer exist.",
-        401
-      )
-    );
+    return next(new AppError("The user belonging to this token does no longer exist.", 401));
   }
 
   if (currentUser.changePasswordAfter(decoded.iat)) {
-    return next(
-      new AppError("User recently changed password! Please log in again.", 401)
-    );
+    return next(new AppError("User recently changed password! Please log in again.", 401));
   }
 
   req.user = currentUser;
@@ -115,9 +101,7 @@ export const protect = catchAsync(async (req, res, next) => {
 export const restrictTo = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
-      return next(
-        new AppError("You do not have permission to perform this action", 403)
-      );
+      return next(new AppError("You do not have permission to perform this action", 403));
     }
     next();
   };
@@ -131,10 +115,7 @@ export const verifyOTP = catchAsync(async (req, res, next) => {
     return next(new AppError("user not found ", 404));
   }
   const hashedCode = crypto.createHash("sha256").update(otp).digest("hex");
-  if (
-    user.verificationCode !== hashedCode ||
-    user.verificationCodeExpires < Date.now()
-  ) {
+  if (user.verificationCode !== hashedCode || user.verificationCodeExpires < Date.now()) {
     return next(new AppError("Invalid or expired OTP.", 400));
   }
   res.status(200).json({
@@ -153,10 +134,14 @@ export const forgetPassword = catchAsync(async (req, res, next) => {
   await user.save({ validateBeforeSave: false });
 
   try {
-    await sendOtpEmail({ to: user.email, code: verificationCode, appName: process.env.APP_NAME || 'Mafcode' });
+    await sendOtpEmail({
+      to: user.email,
+      code: verificationCode,
+      appName: process.env.APP_NAME || "Mafcode",
+    });
   } catch (err) {
     // In case of failure, remove code and expiration so it cannot be used
-    console.error('Email send error:', err && err.message ? err.message : err);
+    console.error("Email send error:", err && err.message ? err.message : err);
     user.verificationCode = undefined;
     user.verificationCodeExpires = undefined;
     await user.save({ validateBeforeSave: false });
@@ -178,10 +163,7 @@ export const resetPassword = catchAsync(async (req, res, next) => {
     return next(AppError("user not found", 404));
   }
   const hashedCode = crypto.createHash("sha256").update(otp).digest("hex");
-  if (
-    hashedCode !== user.verificationCode ||
-    user.verificationCodeExpires < Date.now()
-  ) {
+  if (hashedCode !== user.verificationCode || user.verificationCodeExpires < Date.now()) {
     return next(new AppError("Invalid or expired OTP", 400));
   }
   user.password = password;
@@ -192,14 +174,14 @@ export const resetPassword = catchAsync(async (req, res, next) => {
   createSendToken(user, 200, res);
 });
 
-export const updatePassword = catchAsync(async(req,res,next)=>{
-  const user = await User.findById(req.user.id).select("+password")
+export const updatePassword = catchAsync(async (req, res, next) => {
+  const user = await User.findById(req.user.id).select("+password");
 
-  if(!(await bcrypt.compare(req.body.currentPassword,user.password))){
-    return next (new AppError("your current password isn't correct",401))
+  if (!(await bcrypt.compare(req.body.currentPassword, user.password))) {
+    return next(new AppError("your current password isn't correct", 401));
   }
-  user.password = req.body.newPassword
-  user.confirmPassword = req.body.confirmPassword
-  await user.save()
-  createSendToken(user,200, res)
-})
+  user.password = req.body.newPassword;
+  user.confirmPassword = req.body.confirmPassword;
+  await user.save();
+  createSendToken(user, 200, res);
+});

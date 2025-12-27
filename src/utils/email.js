@@ -1,15 +1,15 @@
-import nodemailer from 'nodemailer';
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
+import nodemailer from "nodemailer";
 
 dotenv.config();
 
 function createTransporter() {
   if (!process.env.GMAIL_USER || !process.env.GMAIL_PASS) {
-    throw new Error('GMAIL_USER and GMAIL_PASS must be set in environment to send emails');
+    throw new Error("GMAIL_USER and GMAIL_PASS must be set in environment to send emails");
   }
 
   return nodemailer.createTransport({
-    service: 'gmail',
+    service: "gmail",
     auth: {
       user: process.env.GMAIL_USER,
       pass: process.env.GMAIL_PASS,
@@ -29,7 +29,7 @@ export async function sendEmail({ to, subject, text, html }) {
   return transporter.sendMail(mailOptions);
 }
 
-export async function sendOtpEmail({ to, code, appName = 'YourApp' }) {
+export async function sendOtpEmail({ to, code, appName = "YourApp" }) {
   const messageText = `Hello!\n\nYour verification code is: ${code}\nThis code will expire in 10 minutes.\n\nIf you didn't request this, please ignore this email.\n\nThanks,\n${appName}`;
 
   const messageHtml = `
@@ -45,7 +45,12 @@ export async function sendOtpEmail({ to, code, appName = 'YourApp' }) {
     </div>
   `;
 
-  return sendEmail({ to, subject: `${appName} — Your verification code`, text: messageText, html: messageHtml });
+  return sendEmail({
+    to,
+    subject: `${appName} — Your verification code`,
+    text: messageText,
+    html: messageHtml,
+  });
 }
 
 export async function verifyTransporter() {

@@ -1,16 +1,18 @@
-import express from "express";
 import cors from "cors";
+import express from "express";
 import morgan from "morgan";
-import AppError from "./utils/appError.js";
-import authRoutes from "./routes/authRoutes.js";
+
 import globalErrorHandler from "./controllers/errorController.js";
-import userRoutes from "./routes/userRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
+import categoryRoutes from "./routes/categoryRoute.js";
+import chatRoutes from "./routes/chatRoutes.js";
 import itemRoutes from "./routes/itemRoutes.js";
+import messageRoutes from "./routes/messageRoute.js";
 import placeRoutes from "./routes/placeRoutes.js";
 import requestRoutes from "./routes/requestRoute.js";
-import categoryRoutes from "./routes/categoryRoute.js";
-import messageRoutes from "./routes/messageRoute.js";
-import chatRoutes from "./routes/chatRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
+import AppError from "./utils/appError.js";
+
 const app = express();
 
 app.use(cors());
