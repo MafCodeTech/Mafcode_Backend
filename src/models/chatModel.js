@@ -2,17 +2,13 @@ import { Schema, model } from "mongoose";
 
 const chatSchema = new Schema(
   {
-    senderId: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-      required: [true, "Chat must have sender id"],
-    },
-
-    recipientId: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-      required: [true, "Chat must have recipient id"],
-    },
+    userIds: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+        required: [true, "Chat must have sender id"],
+      },
+    ],
 
     itemId: {
       type: Schema.Types.ObjectId,
@@ -27,8 +23,20 @@ const chatSchema = new Schema(
   },
   {
     timestamps: { createdAt: true },
+    toJSON: {
+      versionKey: false,
+    },
+    toObject: {
+      versionKey: false,
+    },
   }
 );
+
+chatSchema.index({ userIds: 1, itemId: 1 });
+
+chatSchema.pre(/^find/, function () {
+  this.populate("userIds").populate("itemId").populate("lastMessage");
+});
 
 const Chat = model("Chat", chatSchema);
 
