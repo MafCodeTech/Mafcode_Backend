@@ -26,10 +26,9 @@ export const createMessage = catchAsync(async (req, res, next) => {
     }
   }
 
-  const isParticipant = chat.userIds.some(u => {
-    if (!u) return false;
-    if (u._id) return u._id.toString() === senderId.toString();
-    return u.toString() === senderId.toString();
+  const isParticipant = chat.userIds.some(user => {
+    const id = user._id || user;
+    return id.toString() === senderId.toString();
   });
 
   if (!isParticipant) {
