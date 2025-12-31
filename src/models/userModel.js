@@ -48,6 +48,11 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    status: {
+      type: String,
+      enum: ["online", "offline"],
+      default: "offline",
+    },
     createdAt: {
       type: Date,
       default: Date.now(),
@@ -112,7 +117,7 @@ userSchema.methods.changePasswordAfter = function (JWTTimestamp) {
 userSchema.methods.createVerificationCode = function () {
   const code = Math.floor(1000 + Math.random() * 9000).toString();
   this.verificationCode = crypto.createHash("sha256").update(code).digest("hex");
-  console.log(code, this.verificationCode);
+  // console.log(code, this.verificationCode);
   this.verificationCodeExpires = Date.now() + 10 * 60 * 1000;
   return code;
 };

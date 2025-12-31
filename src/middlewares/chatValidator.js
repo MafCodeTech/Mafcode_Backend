@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import Chat from "../models/chatModel.js";
 import Item from "../models/itemModel.js";
 import User from "../models/userModel.js";
-import AppError from "../utils/appError";
+import AppError from "../utils/appError.js";
 import catchAsync from "../utils/catchAsync.js";
 
 export const validateCreateChat = catchAsync(async (req, res, next) => {
@@ -28,6 +28,10 @@ export const validateCreateChat = catchAsync(async (req, res, next) => {
   const item = await Item.findById(itemId);
   if (!item) {
     return next(new AppError("No item found!", 404));
+  }
+
+  if (item.createdBy.toString() !== recipient._id.toString()) {
+    return next(new AppError("This item is not created by this recipient!", 400));
   }
 
   next();
@@ -65,6 +69,10 @@ export const validateGetChat = catchAsync(async (req, res, next) => {
     const item = await Item.findById(itemId);
     if (!item) {
       return next(new AppError("No item found!", 404));
+    }
+
+    if (item.createdBy.toString() !== recipient._id.toString()) {
+      return next(new AppError("This item is not created by this recipient!", 400));
     }
   }
 
@@ -122,6 +130,10 @@ export const validateDeleteChat = catchAsync(async (req, res, next) => {
     const item = await Item.findById(itemId);
     if (!item) {
       return next(new AppError("No item found!", 404));
+    }
+
+    if (item.createdBy.toString() !== recipient._id.toString()) {
+      return next(new AppError("This item is not created by this recipient!", 400));
     }
   }
 

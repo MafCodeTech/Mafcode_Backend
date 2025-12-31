@@ -1,21 +1,21 @@
 import dotenv from "dotenv";
 import http from "http";
-import mongoose from "mongoose";
+import { connect } from "mongoose";
 
 import app from "./app.js";
-import initSocket from "./socket.js";
+import { initSocket } from "./services/socket.js";
+import logger from "./utils/logger.js";
 
 dotenv.config();
 const DB_URI = process.env.DATABASE_URL;
 const port = process.env.PORT || 9000;
 
 try {
-  mongoose
-    .connect(DB_URI)
+  connect(DB_URI)
     .then(() => {
-      console.log("Connected to the database");
+      logger.info("Connected to the database");
     })
-    .catch(error => console.log("database error", error.message));
+    .catch(error => logger.error("database error", error.message));
 
   const server = http.createServer(app);
 
@@ -23,8 +23,8 @@ try {
   initSocket(server);
 
   server.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
+    logger.info(`Server is running on port ${port}`);
   });
 } catch (error) {
-  console.log("Server startup error: ", error);
+  logger.error("Server startup error: ", error);
 }

@@ -4,12 +4,12 @@ import morgan from "morgan";
 
 import globalErrorHandler from "./controllers/errorController.js";
 import authRoutes from "./routes/authRoutes.js";
-import categoryRoutes from "./routes/categoryRoute.js";
+import categoryRoutes from "./routes/categoryRoutes.js";
 import chatRoutes from "./routes/chatRoutes.js";
 import itemRoutes from "./routes/itemRoutes.js";
-import messageRoutes from "./routes/messageRoute.js";
+import messageRoutes from "./routes/messageRoutes.js";
 import placeRoutes from "./routes/placeRoutes.js";
-import requestRoutes from "./routes/requestRoute.js";
+import requestRoutes from "./routes/requestRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import AppError from "./utils/appError.js";
 

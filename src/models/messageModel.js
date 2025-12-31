@@ -17,7 +17,7 @@ const messageSchema = new Schema(
       ref: "Chat",
       required: [true, "Message must have chat id"],
     },
-    content: {
+    text: {
       type: String,
       trim: true,
     },

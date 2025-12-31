@@ -9,6 +9,7 @@ import User from "../models/userModel.js";
 import AppError from "../utils/appError.js";
 import catchAsync from "../utils/catchAsync.js";
 import { sendOtpEmail } from "../utils/email.js";
+import logger from "../utils/logger.js";
 
 dotenv.config();
 
@@ -141,7 +142,7 @@ export const forgetPassword = catchAsync(async (req, res, next) => {
     });
   } catch (err) {
     // In case of failure, remove code and expiration so it cannot be used
-    console.error("Email send error:", err && err.message ? err.message : err);
+    logger.error("Email send error:", err && err.message ? err.message : err);
     user.verificationCode = undefined;
     user.verificationCodeExpires = undefined;
     await user.save({ validateBeforeSave: false });

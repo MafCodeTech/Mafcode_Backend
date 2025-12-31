@@ -4,7 +4,7 @@ import multer from "multer";
 import stream from "stream";
 
 import AppError from "../utils/appError.js";
-import catchAsync from "../utils/catchAsync";
+import catchAsync from "../utils/catchAsync.js";
 
 config();
 

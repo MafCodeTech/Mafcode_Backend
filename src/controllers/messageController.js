@@ -4,7 +4,7 @@ import AppError from "../utils/appError.js";
 import catchAsync from "../utils/catchAsync.js";
 
 export const createMessage = catchAsync(async (req, res, next) => {
-  const { content, chatId, recipientId, itemId, file, fileName, fileSize, mimeType, messageType } =
+  const { text, chatId, recipientId, itemId, file, fileName, fileSize, mimeType, messageType } =
     req.body;
   const senderId = req.user._id;
   let computedRecipientId;
@@ -39,7 +39,7 @@ export const createMessage = catchAsync(async (req, res, next) => {
     chatId: chat._id,
     senderId,
     recipientId: computedRecipientId,
-    content,
+    text,
     file,
     messageType,
     fileName,
@@ -81,5 +81,64 @@ export const getChatMessages = catchAsync(async (req, res, next) => {
         total,
       },
     },
+  });
+});
+
+export const markAsRead = catchAsync(async (req, res, next) => {
+  const { messageId } = req.params;
+
+  const message = await Message.findById(messageId);
+
+  if (!message.seen) {
+    message.seen = true;
+    message.seenAt = Date.now();
+    await message.save();
+  }
+
+  res.status(200).json({
+    status: "success",
+    message: "Message marked as read!",
+    data: { message },
+  });
+});
+
+export const editMessage = catchAsync(async (req, res, next) => {
+  const { newText } = req.body;
+  const { messageId } = req.params;
+
+  const message = await Message.findById(messageId);
+
+  message.text = newText;
+  message.isEdited = true;
+  message.updatedAt = Date.now();
+  await message.save();
+
+  res.status(202).json({
+    status: "success",
+    message: "Message updated successfully!",
+    data: { message },
+  });
+});
+
+export const deleteMessage = catchAsync(async (req, res, next) => {
+  const { messageId } = req.params;
+
+  const message = await Message.findById(messageId);
+
+  const chat = await Chat.findById(message.chatId);
+
+  await message.deleteOne();
+
+  if (chat.lastMessage === message._id) {
+    const lastMsg = await Message.findOne({ chatId: message.chatId }).sort({ createdAt: -1 });
+
+    chat.lastMessage = lastMsg?._id || null;
+    await chat.save();
+  }
+
+  res.status(204).json({
+    status: "success",
+    message: "Message deleted successfully!",
+    data: null,
   });
 });
