@@ -4,7 +4,6 @@ import { Server } from "socket.io";
 import { promisify } from "util";
 
 import Chat from "../models/chatModel.js";
-import Message from "../models/messageModel.js";
 import User from "../models/userModel.js";
 import AppError from "../utils/appError.js";
 import logger from "../utils/logger.js";
