@@ -37,7 +37,11 @@ export const uploadFile = upload.single("file");
 export const processMessageFile = catchAsync((req, res, next) => {
   try {
     const file = req.file;
-    const messageType = req.body.messageType || file.mimetype.split("/")[0];
+
+    if (!req.body.messageType && file.mimetype.split("/")[0] === "application") {
+      req.body.messageType = "file";
+    }
+    const messageType = req.body.messageType;
 
     if (!file) {
       return next(new AppError("No file uploaded", 400));
@@ -59,8 +63,8 @@ export const processMessageFile = catchAsync((req, res, next) => {
         folder += "audio";
         resourceType = "video"; // Cloudinary uses video for audio
         break;
-      case "application":
-        folder += "application";
+      case "file":
+        folder += "file";
         resourceType = "raw";
         break;
     }

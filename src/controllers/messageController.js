@@ -1,7 +1,9 @@
 import Chat from "../models/chatModel.js";
 import Message from "../models/messageModel.js";
+import { getIO } from "../services/socket.js";
 import AppError from "../utils/appError.js";
 import catchAsync from "../utils/catchAsync.js";
+import logger from "../utils/logger.js";
 
 export const createMessage = catchAsync(async (req, res, next) => {
   const { text, chatId, recipientId, itemId, file, fileName, fileSize, mimeType, messageType } =
@@ -52,6 +54,19 @@ export const createMessage = catchAsync(async (req, res, next) => {
 
   await message.populate("senderId");
   await message.populate("recipientId");
+
+  const io = getIO();
+  io.to(chat._id).emit("new-message", {
+    chatId: chat._id,
+    message,
+  });
+  logger.info(`Successfully emitted 'new-message' to chat ${chat._id}`);
+
+  io.to(computedRecipientId).emit("lastMessage-update", {
+    chatId: chat._id,
+    lastMessage: message,
+  });
+  logger.info(`Successfully emitted 'lastMessage-update' to user ${computedRecipientId}`);
 
   res.status(201).json({
     status: "success",
@@ -113,6 +128,17 @@ export const editMessage = catchAsync(async (req, res, next) => {
   message.updatedAt = Date.now();
   await message.save();
 
+  const chat = await Chat.findById(message.chatId);
+  chat.lastMessage = message;
+  await message.save();
+
+  const io = getIO();
+  io.to(chat._id).emit("update-message", {
+    chatId: chat._id,
+    message,
+  });
+  logger.info(`Successfully emitted 'update-message' to chat: ${chat._id}`);
+
   res.status(202).json({
     status: "success",
     message: "Message updated successfully!",
@@ -135,6 +161,18 @@ export const deleteMessage = catchAsync(async (req, res, next) => {
     chat.lastMessage = lastMsg?._id || null;
     await chat.save();
   }
+
+  const io = getIO();
+  io.to(chat._id).emit("delete-message", {
+    chatId: chat._id,
+    deletedMessageId: message._id,
+    message,
+  });
+
+  io.to(chat.recipientId).emit("lastMessage-update", {
+    chatId: chat._id,
+    lastMessage: chat.lastMessage,
+  });
 
   res.status(204).json({
     status: "success",

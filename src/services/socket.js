@@ -4,6 +4,7 @@ import { Server } from "socket.io";
 import { promisify } from "util";
 
 import Chat from "../models/chatModel.js";
+import Message from "../models/messageModel.js";
 import User from "../models/userModel.js";
 import AppError from "../utils/appError.js";
 import logger from "../utils/logger.js";
@@ -91,6 +92,25 @@ export function initSocket(server) {
 
         // Join the user to chat room
         socket.join(chatId);
+
+        const updateMessagesStatus = await Message.updateMany(
+          {
+            chatId,
+            recipientId: socket.userId,
+            seen: false,
+          },
+          {
+            $set: { seen: true, seenAt: Date.now() },
+          }
+        );
+
+        if (updateMessagesStatus > 0) {
+          io.to(chatId).emit("messages-read", {
+            chatId,
+            seenAt: Date.now(),
+          });
+        }
+
         socket.emit("joined-chat", { chatId, success: true });
 
         logger.info(`User ${socket.userId} joined chat ${chatId}`);

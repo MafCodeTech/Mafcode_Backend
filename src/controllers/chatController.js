@@ -1,4 +1,5 @@
 import Chat from "../models/chatModel.js";
+import Message from "../models/messageModel.js";
 import AppError from "../utils/appError.js";
 import catchAsync from "../utils/catchAsync.js";
 
@@ -51,10 +52,25 @@ export const getUserChats = catchAsync(async (req, res, next) => {
 
   const chats = await Chat.find({ userIds: { $in: userId } });
 
+  const chatsWithUnreadCount = await Promise.all(
+    chats.map(async chat => {
+      const unreadCount = await Message.countDocuments({
+        chatId: chat._id,
+        recipientId: userId,
+        seen: false,
+      });
+
+      return {
+        ...chat.toObject(),
+        unreadCount,
+      };
+    })
+  );
+
   res.status(200).json({
     status: "success",
-    results: chats.length,
-    data: { chats },
+    results: chatsWithUnreadCount.length,
+    data: { chats: chatsWithUnreadCount },
   });
 });
 
@@ -64,9 +80,25 @@ export const getUserItemChats = catchAsync(async (req, res, next) => {
 
   const chats = await Chat.find({ userIds: { $in: userId }, itemId });
 
+  const chatsWithUnreadCount = await Promise.all(
+    chats.map(async chat => {
+      const unreadCount = await Message.countDocuments({
+        chatId: chat._id,
+        recipientId: userId,
+        seen: false,
+      });
+
+      return {
+        ...chat.toObject(),
+        unreadCount,
+      };
+    })
+  );
+
   res.status(200).json({
     status: "success",
-    data: { chats },
+    results: chatsWithUnreadCount.length,
+    data: { chats: chatsWithUnreadCount },
   });
 });
 
