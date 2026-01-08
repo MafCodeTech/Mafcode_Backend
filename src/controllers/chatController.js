@@ -5,7 +5,7 @@ import catchAsync from "../utils/catchAsync.js";
 
 export const createChat = catchAsync(async (req, res, next) => {
   const { recipientId, itemId } = req.body;
-  const senderId = req.body.senderId || req.user._id;
+  const senderId = req.user._id;
 
   let chat = await Chat.findOne({ itemId, userIds: { $all: [senderId, recipientId], $size: 2 } });
 
